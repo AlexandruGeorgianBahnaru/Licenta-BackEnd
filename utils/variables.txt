@@ -1,5 +1,5 @@
 start_sequence="\n"
 end_sequence="\n"
-open_ai_key="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"
+open_ai_key="."
 chat_version="gpt-4o"
 chat_message_explanation="Am nevoie doar de valoarea concreta fara alte cuvinte pentru a fi folosita in aplicatie "
