@@ -1,5 +1,0 @@
-start_sequence="\n"
-end_sequence="\n"
-open_ai_key="."
-chat_version="gpt-4o"
-chat_message_explanation="Am nevoie doar de valoarea concreta fara alte cuvinte pentru a fi folosita in aplicatie "

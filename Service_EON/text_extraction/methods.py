@@ -1,37 +1,18 @@
+from utils.constants import *
 from openai import OpenAI
 import re
 from pdfminer.high_level import extract_pages,extract_text
 from pyexpat.errors import messages
 
 searched_values = ["Cantitate facturată", "Perioadă facturată", "Mod stabilire index", "Sold de plată", "Total valoare factură\\ncurentă", "Sold anterior", "Dată scadență", "Dată emitere", "ValoareTVA"]
+# de mutat in baza de date
 found_values = dict()
 
-open_ai_key = ""
-chat_version = ""
-chat_message_content = ""
-chat_message_explanation = ""
 response = ""
-
-
-file = open("utils\\variables.txt","r")
-
-for line in file:
-    line.rstrip()
-    last_dqoute = line.rfind('"')
-    penultimate_dqoute = line.rfind('"', 0, last_dqoute)
-    if "start_sequence" in line:
-        start_sequence = line[penultimate_dqoute + 1 : last_dqoute]
-    if "end_sequence" in line:
-        end_sequence = line[penultimate_dqoute + 1 : last_dqoute]
-    if "open_ai_key" in line:
-        open_ai_key = line[penultimate_dqoute + 1: last_dqoute]
-    if "chat_version" in line:
-            chat_version = line[penultimate_dqoute + 1: last_dqoute]
-    if "chat_message_explanation" in line:
-        chat_message_explanation = line[penultimate_dqoute + 1: last_dqoute]
+chat_message_content = ""
 
 client = OpenAI(
-    api_key=open_ai_key,
+    api_key=OPEN_AI_KEY,
 )
 
 def find_index(element):
@@ -41,7 +22,7 @@ def find_index(element):
     return -1
 
 def openai_api_call(element, index):
-    chat_message_content = chat_message_explanation + searched_values[index] + "din textul : " + element
+    chat_message_content = CHAT_MESSAGE_EXPLANATION + searched_values[index] + "din textul : " + element
     chat_completion = client.chat.completions.create(
         messages=[
             {
@@ -49,7 +30,7 @@ def openai_api_call(element, index):
                 "content": chat_message_content,
             }
         ],
-        model=chat_version,
+        model=CHAT_VERSION,
     )
     return chat_completion.choices[0].message.content
 
@@ -63,7 +44,7 @@ def text_extractor(path):
                 found_values.update({searched_values[index]: response_message if "," not in response_message else response_message.replace(',', '.')})
     cantitate_facturata = re.findall(r'\d+,\d+|\d+', found_values["Cantitate facturată"])
     value_khw = (float(found_values["Sold de plată"]) / float(cantitate_facturata[0])) / (1.0 + float(found_values["ValoareTVA"]) / 100)
-    found_values.update({"Valoare kwh": value_khw})
+    found_values.update({"Valoare kwh": round(value_khw, 3)})
     print(found_values)
 
 
